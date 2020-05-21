@@ -127,7 +127,7 @@ var mode = textTrack.mode;
             var UTCseconds = (x.getTime() + x.getTimezoneOffset()*60*1000)/1000;
             playButton.innerHTML = 'Pause';
             // video.currentTime = UTCseconds % duration;
-            video.currentTime = 450;
+            video.currentTime = 0;
             video.play();
           } else if (playButton.innerHTML == 'Pause') {
             event.preventDefault();
