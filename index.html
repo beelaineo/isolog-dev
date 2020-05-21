@@ -1,0 +1,192 @@
+<html>
+<body>
+
+<div id="button-wrapper">
+<button id="play">Start</button>
+</div>
+
+  <div id="audioCenter">
+    <video loop>
+      <source src="./audio.m4a" type="audio/mpeg">
+      <track kind="subtitles" label="Text" src="./subtitles.vtt" srclang="en" default />
+      Your browser does not support the audio element.
+    </video>
+  </div>
+
+<span id="sudo"></span>
+<span id="maude"></span>
+<span id="pseudo"></span>
+
+</body>
+</html>
+
+<style>
+
+body, html {
+  min-height:100vh;
+  margin: 0;
+  padding: 0
+  font-family: sans-serif;
+}
+
+#button-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+button {
+  font-size: 12px;
+  width: 100px;
+  padding: 0.5rem;
+  margin: 1rem auto;
+}
+
+video {
+  display: none;
+}
+track {
+  background: transparent !important;
+}
+*::cue {
+  color: red;
+  font-family: serif;
+  font-size: 24px;
+}
+
+span {
+  transition: all ease-out 5000ms;
+  font-family: sans-serif;
+  font-size: 5vw;
+}
+
+span.active {
+  transition: all ease-out 100ms;
+}
+
+#sudo {
+  position: absolute;
+  top: 20vh;
+  left: 10vw;
+  width: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+  text-align: center;
+  display: block;
+}
+
+#maude {
+  position:absolute;
+  bottom: 20vh;
+  right: 10vw;
+  width: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+  display: block;
+  text-align: center;
+}
+
+#pseudo {
+  position: absolute;
+  top: 35vh;
+  left: 30vw;
+  width: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+  text-align: center;
+  display: block;
+}
+
+
+</style>
+
+<script>
+var playButton = document.getElementById('play');
+var videoElement = document.querySelector("video");
+var textTracks = videoElement.textTracks;
+var textTrack = textTracks[0];
+var kind = textTrack.kind // e.g. "subtitles"
+var mode = textTrack.mode;
+
+(function(){
+    var video = document.querySelector('video');
+    var onDurationChange = function(){
+  		if(video.readyState){
+        var duration = video.duration;
+        console.log('video duration: ' + duration);
+        playButton.addEventListener("click", function (event) {
+          if (playButton.innerHTML == 'Start') {
+            event.preventDefault();
+            x = new Date();
+            var UTCseconds = (x.getTime() + x.getTimezoneOffset()*60*1000)/1000;
+            playButton.innerHTML = 'Pause';
+            // video.currentTime = UTCseconds % duration;
+            video.currentTime = 450;
+            video.play();
+          } else if (playButton.innerHTML == 'Pause') {
+            event.preventDefault();
+            playButton.innerHTML = 'Play';
+            video.pause();
+          } else if (playButton.innerHTML == 'Play') {
+            event.preventDefault();
+            playButton.innerHTML = 'Pause';
+            video.play();
+          }
+        }, false);
+  		}
+  	};
+
+  	video.addEventListener('durationchange', onDurationChange);
+  	onDurationChange();
+
+    var sudo = document.getElementById('sudo');
+    var maude = document.getElementById('maude');
+    var pseudo = document.getElementById('pseudo');
+
+    if (!video.textTracks) return;
+    console.log(video.textTracks);
+    var track = video.textTracks[0];
+    track.mode = 'hidden';
+
+    track.oncuechange = function(e) {
+        var cue = this.activeCues[0];
+        sudo.classList.remove("active");
+        sudo.style.opacity = '0';
+        pseudo.style.opacity = '0';
+        pseudo.classList.remove("active");
+        maude.style.opacity = '0';
+        maude.classList.remove("active");
+
+        if (cue) {
+            console.log(cue);
+
+            if (cue.text.includes('<v SUDO>')) {
+              var duration = 1000*(cue.endTime - cue.startTime);
+              sudo.innerHTML = '';
+              sudo.appendChild(cue.getCueAsHTML());
+              sudo.style.opacity =  '1';
+              sudo.classList.add("active");
+            } else if (cue.text.includes('<v PSEUDO>')) {
+              var duration = 1000*(cue.endTime - cue.startTime);
+              pseudo.innerHTML = '';
+              pseudo.appendChild(cue.getCueAsHTML());
+              pseudo.style.opacity =  '1';
+              pseudo.classList.add("active");
+            } else if (cue.text.includes('<v MAUDE>')) {
+              var duration = 1000*(cue.endTime - cue.startTime);
+              maude.innerHTML = '';
+              maude.appendChild(cue.getCueAsHTML());
+              maude.style.opacity =  '1';
+              maude.classList.add("active");
+            }
+        }
+
+    };
+})()
+
+</script>
